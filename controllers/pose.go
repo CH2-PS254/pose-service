@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"context"
+	"io"
 	"net/http"
 
 	"pose-service/db"
 	"pose-service/models"
 
+	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -108,4 +111,62 @@ func DeletePose(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Pose deleted successfully"})
+}
+
+func UploadImage(c *gin.Context) {
+	var pose models.Pose
+
+	id := c.Param("id")
+
+	if err := db.GetDB().First(&pose, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Pose not found"})
+			return
+		}
+
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to create storage client"})
+		return
+	}
+	defer client.Close()
+
+	f, err := file.Open()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
+		return
+	}
+	defer f.Close()
+
+	bucketName := "pose-service"
+
+	wc := client.Bucket(bucketName).Object(file.Filename).NewWriter(ctx)
+	if _, err = io.Copy(wc, f); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to copy file to bucket"})
+		return
+	}
+	if err := wc.Close(); err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to close bucket writer"})
+		return
+	}
+
+	publicURL := "https://storage.googleapis.com/" + bucketName + "/" + file.Filename
+
+	if err := db.GetDB().Model(&pose).Update("image", publicURL).Error; err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Image uploaded successfully"})
 }

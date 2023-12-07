@@ -18,6 +18,7 @@ func main() {
 	r.POST("/poses", controllers.CreatePose)
 	r.PUT("/poses/:id", controllers.UpdatePose)
 	r.DELETE("/poses/:id", controllers.DeletePose)
+	r.POST("/poses/:id/image", controllers.UploadImage)
 
 	r.Run("localhost:8080")
 }
