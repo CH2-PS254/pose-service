@@ -137,14 +137,14 @@ func UploadImage(c *gin.Context) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to create storage client"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to create storage client"})
 		return
 	}
 	defer client.Close()
 
 	f, err := file.Open()
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to open file"})
 		return
 	}
 	defer f.Close()
@@ -153,11 +153,11 @@ func UploadImage(c *gin.Context) {
 
 	wc := client.Bucket(bucketName).Object(file.Filename).NewWriter(ctx)
 	if _, err = io.Copy(wc, f); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to copy file to bucket"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to copy file to bucket"})
 		return
 	}
 	if err := wc.Close(); err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to close bucket writer"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to close bucket writer"})
 		return
 	}
 

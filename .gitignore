@@ -20,8 +20,11 @@
 # Go workspace file
 go.work
 
-# environment file
+# Environment file
 .env
 
 # GCP service account key file
 *.json
+
+# App Engine app.yaml file
+app.yaml
