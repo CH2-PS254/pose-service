@@ -36,7 +36,9 @@ func Init() {
 	database, err := gorm.Open(postgres.New(postgres.Config{
 		DriverName: "cloudsqlpostgres",
 		DSN:        connString,
-	}))
+	}), &gorm.Config{
+		TranslateError: true,
+	})
 	if err != nil {
 		panic(err)
 	}

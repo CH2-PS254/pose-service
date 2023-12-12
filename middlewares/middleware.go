@@ -11,20 +11,20 @@ import (
 func Middleware(c *gin.Context) {
 	tokenString, err := utils.ExtractBearerToken(c.GetHeader("Authorization"))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, utils.FormatError("Authentication credentials were missing or incorrect"))
 		return
 	}
 
 	token, err := utils.ParseToken(tokenString)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Malformed token"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, utils.FormatError("Failed to parse token"))
 		return
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.Set("username", claims["username"])
 	} else {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Invalid token"})
+		c.AbortWithStatusJSON(http.StatusForbidden, utils.FormatError("The request is understood, but it has been refused or access is not allowed"))
 		return
 	}
 
