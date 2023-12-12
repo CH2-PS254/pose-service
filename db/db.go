@@ -47,6 +47,11 @@ func Init() {
 	if err != nil {
 		return
 	}
+
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		return
+	}
 }
 
 func GetDB() *gorm.DB {

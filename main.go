@@ -5,6 +5,7 @@ import (
 	"os"
 	"pose-service/controllers"
 	"pose-service/db"
+	"pose-service/middlewares"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,24 @@ func main() {
 
 	r := gin.Default()
 
-	r.GET("/poses", controllers.GetPoses)
-	r.GET("/poses/:id", controllers.GetPoseByID)
-	r.POST("/poses", controllers.CreatePose)
-	r.PUT("/poses/:id", controllers.UpdatePose)
-	r.DELETE("/poses/:id", controllers.DeletePose)
-	r.POST("/poses/:id/image", controllers.UploadImage)
+	r.POST("/register", controllers.CreateUser)
+	r.POST("/login", controllers.Login)
+
+	authorized := r.Group("/")
+	authorized.Use(middlewares.Middleware)
+	{
+		authorized.GET("/users", controllers.GetUsers)
+		authorized.GET("/users/:id", controllers.GetUserByID)
+		authorized.PUT("/users/:id", controllers.UpdateUser)
+		authorized.DELETE("/users/:id", controllers.DeleteUser)
+
+		authorized.GET("/poses", controllers.GetPoses)
+		authorized.GET("/poses/:id", controllers.GetPoseByID)
+		authorized.POST("/poses", controllers.CreatePose)
+		authorized.PUT("/poses/:id", controllers.UpdatePose)
+		authorized.DELETE("/poses/:id", controllers.DeletePose)
+		authorized.POST("/poses/:id/image", controllers.UploadImage)
+	}
 
 	var address string
 	if runtime.GOOS == "windows" {
