@@ -17,11 +17,20 @@ func GetPoses(c *gin.Context) {
 	var poses []models.Pose
 
 	if err := db.GetDB().Find(&poses).Error; err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{
+			"status":  "error",
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, poses)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Poses fetched successfully",
+		"data": gin.H{
+			"poses": poses,
+		},
+	})
 }
 
 func GetPoseByID(c *gin.Context) {
