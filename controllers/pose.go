@@ -57,7 +57,7 @@ func GetPoseByID(c *gin.Context) {
 func CreatePose(c *gin.Context) {
 	var pose models.CreatePoseInput
 
-	if err := c.BindJSON(&pose); err != nil {
+	if err := c.ShouldBindJSON(&pose); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			var out = make(map[string]string, len(ve))
@@ -106,7 +106,7 @@ func UpdatePose(c *gin.Context) {
 
 	var updatedPose models.UpdatePoseInput
 
-	if err := c.BindJSON(&updatedPose); err != nil {
+	if err := c.ShouldBindJSON(&updatedPose); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			var out = make(map[string]string, len(ve))

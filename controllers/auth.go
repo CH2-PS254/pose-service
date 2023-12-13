@@ -15,7 +15,7 @@ import (
 func Login(c *gin.Context) {
 	var input models.LoginInput
 
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			var out = make(map[string]string, len(ve))

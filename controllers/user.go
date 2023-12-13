@@ -46,7 +46,7 @@ func GetUserByID(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var input models.CreateUserInput
 
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, utils.FormatError("Validation errors in your request"))
 		return
 	}
@@ -83,7 +83,7 @@ func UpdateUser(c *gin.Context) {
 
 	id := c.Param("id")
 
-	if err := c.BindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, utils.FormatError("Validation errors in your request"))
 		return
 	}
